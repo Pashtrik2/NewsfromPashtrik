@@ -3,8 +3,41 @@ $pageTitle = 'Home - News Portal';
 include 'header.php';
 ?>
 
-<h2>Welcome to News Portal</h2>
-<p>This is the home page of your news portal website.</p>
-<p>Browse the latest articles and updates from around the world.</p>
+<section class="hero">
+	<h2>Stay Updated With What Matters Today</h2>
+	<p>
+		Your daily source for top stories in technology, world events, business,
+		and culture. Clean headlines, quick reads, and reliable updates.
+	</p>
+</section>
+
+<section>
+	<h2 class="section-title">Top Stories</h2>
+	<div class="news-grid">
+		<article class="news-card">
+			<img src="https://picsum.photos/600/400?random=11" alt="City skyline at sunrise">
+			<div class="news-content">
+				<h3>Global Markets Open Higher as Tech Leads Gains</h3>
+				<p>Investors react to positive earnings reports and renewed optimism across major sectors.</p>
+			</div>
+		</article>
+
+		<article class="news-card">
+			<img src="https://picsum.photos/600/400?random=12" alt="Modern newsroom desk with screens">
+			<div class="news-content">
+				<h3>New AI Tools Reshape How Journalists Report Live Events</h3>
+				<p>Newsrooms are adopting faster workflows while balancing fact-checking and editorial standards.</p>
+			</div>
+		</article>
+
+		<article class="news-card">
+			<img src="https://picsum.photos/600/400?random=13" alt="People walking in a busy city street">
+			<div class="news-content">
+				<h3>Urban Innovation Projects Improve Public Transit Access</h3>
+				<p>City planners roll out smart mobility updates aimed at reducing commute times.</p>
+			</div>
+		</article>
+	</div>
+</section>
 
 <?php include 'footer.php'; ?>
