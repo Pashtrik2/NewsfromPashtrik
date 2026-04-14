@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/app/bootstrap.php';
+
 $pageTitle = 'Home - News Portal';
 include 'header.php';
 ?>
@@ -10,6 +12,20 @@ include 'header.php';
 		and culture. Clean headlines, quick reads, and reliable updates.
 	</p>
 </section>
+
+<?php if ($auth->check()): ?>
+	<section class="auth-card">
+		<h2>Welcome Back, <?php echo htmlspecialchars($auth->user()['full_name']); ?></h2>
+		<p class="auth-intro">
+			You are signed in as <strong><?php echo htmlspecialchars($auth->user()['role']); ?></strong>.
+			<?php if ($auth->isAdmin()): ?>
+				Use the admin area to review registered accounts.
+			<?php else: ?>
+				Your account can access member-only news content.
+			<?php endif; ?>
+		</p>
+	</section>
+<?php endif; ?>
 
 <section>
 	<h2 class="section-title">Top Stories</h2>

@@ -1,4 +1,44 @@
 <?php
+declare(strict_types=1);
+
+require_once __DIR__ . '/app/bootstrap.php';
+
+$email = '';
+$errors = [
+	'email' => '',
+	'password' => '',
+];
+
+if ($auth->check()) {
+	$auth->redirectAfterLogin();
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+	$email = strtolower(trim((string) ($_POST['email'] ?? '')));
+	$password = (string) ($_POST['password'] ?? '');
+
+	if ($email === '') {
+		$errors['email'] = 'Email is required.';
+	} elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+		$errors['email'] = 'Enter a valid email address.';
+	}
+
+	if ($password === '') {
+		$errors['password'] = 'Password is required.';
+	} elseif (strlen($password) < 8) {
+		$errors['password'] = 'Password must be at least 8 characters.';
+	}
+
+	if (!array_filter($errors) && !$auth->attemptLogin($email, $password)) {
+		$errors['password'] = 'The email or password is incorrect.';
+	}
+
+	if (!array_filter($errors)) {
+		$auth->flash('success', 'Login successful.');
+		$auth->redirectAfterLogin();
+	}
+}
+
 $pageTitle = 'Login - News Portal';
 include 'header.php';
 ?>
@@ -7,99 +47,23 @@ include 'header.php';
 	<h2 id="login-title">Welcome Back</h2>
 	<p class="auth-intro">Log in to continue reading and managing your personalized news feed.</p>
 
-	<form id="loginForm" class="auth-form" action="#" method="post" novalidate>
+	<form id="loginForm" class="auth-form" action="login.php" method="post" novalidate>
 		<div class="field-group">
 			<label for="loginEmail">Email Address</label>
-			<input type="email" id="loginEmail" name="email" autocomplete="email" required>
-			<p class="field-error" id="loginEmailError"></p>
+			<input type="email" id="loginEmail" name="email" value="<?php echo htmlspecialchars($email); ?>" autocomplete="email" required>
+			<p class="field-error" id="loginEmailError"><?php echo htmlspecialchars($errors['email']); ?></p>
 		</div>
 
 		<div class="field-group">
 			<label for="loginPassword">Password</label>
 			<input type="password" id="loginPassword" name="password" autocomplete="current-password" required>
-			<p class="field-error" id="loginPasswordError"></p>
+			<p class="field-error" id="loginPasswordError"><?php echo htmlspecialchars($errors['password']); ?></p>
 		</div>
 
 		<button type="submit" class="auth-btn">Log In</button>
 	</form>
+	<p class="helper-text">Use the account you registered. The first registered account is granted the admin role.</p>
 </section>
-
-<style>
-	.auth-card {
-		max-width: 480px;
-		margin: 24px auto;
-		padding: 24px;
-		background: #ffffff;
-		border: 1px solid #dbe3ec;
-		border-radius: 16px;
-		box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
-	}
-
-	.auth-card h2 {
-		margin: 0 0 6px;
-		color: #0f172a;
-	}
-
-	.auth-intro {
-		margin: 0 0 18px;
-		color: #64748b;
-	}
-
-	.auth-form {
-		display: grid;
-		gap: 14px;
-	}
-
-	.field-group {
-		display: grid;
-		gap: 6px;
-	}
-
-	.field-group label {
-		font-weight: 600;
-		color: #1e293b;
-	}
-
-	.field-group input {
-		width: 100%;
-		padding: 10px 12px;
-		border: 1px solid #cbd5e1;
-		border-radius: 10px;
-		font: inherit;
-	}
-
-	.field-group input:focus {
-		border-color: #0f766e;
-		outline: 2px solid rgba(15, 118, 110, 0.2);
-		outline-offset: 1px;
-	}
-
-	.field-group input.has-error {
-		border-color: #dc2626;
-		outline: none;
-	}
-
-	.field-error {
-		min-height: 1.1em;
-		margin: 0;
-		font-size: 0.86rem;
-		color: #b91c1c;
-	}
-
-	.auth-btn {
-		padding: 11px 14px;
-		border: none;
-		border-radius: 10px;
-		background: #0f766e;
-		color: #ffffff;
-		font-weight: 700;
-		cursor: pointer;
-	}
-
-	.auth-btn:hover {
-		background: #115e59;
-	}
-</style>
 
 <script>
 	(function () {
@@ -117,6 +81,9 @@ include 'header.php';
 			errorNode.textContent = message;
 			input.classList.toggle('has-error', message.length > 0);
 		}
+
+		setError(email, emailError, emailError.textContent.trim());
+		setError(password, passwordError, passwordError.textContent.trim());
 
 		form.addEventListener('submit', function (event) {
 			var emailValue = email.value.trim();

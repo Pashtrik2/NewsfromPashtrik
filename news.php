@@ -1,4 +1,10 @@
 <?php
+declare(strict_types=1);
+
+require_once __DIR__ . '/app/bootstrap.php';
+
+$auth->requireAuth('login.php');
+
 $pageTitle = 'News - News Portal';
 include 'header.php';
 ?>
@@ -9,6 +15,19 @@ include 'header.php';
 		Explore curated stories across world news, technology, business, and society,
 		presented in a clean and easy-to-read layout.
 	</p>
+</section>
+
+<section class="auth-card">
+	<h2>Member Access</h2>
+	<p class="auth-intro">
+		Signed in as <strong><?php echo htmlspecialchars($auth->user()['full_name']); ?></strong>
+		with the <strong><?php echo htmlspecialchars($auth->user()['role']); ?></strong> role.
+	</p>
+	<?php if ($auth->isAdmin()): ?>
+		<p class="helper-text">Admins can review account activity from the dashboard and still access all member news content.</p>
+	<?php else: ?>
+		<p class="helper-text">Standard users can view protected news content after logging in.</p>
+	<?php endif; ?>
 </section>
 
 <section>
@@ -63,5 +82,17 @@ include 'header.php';
 		</article>
 	</div>
 </section>
+
+<?php if ($auth->isAdmin()): ?>
+	<section>
+		<h2 class="section-title">Admin Notes</h2>
+		<div class="table-card" style="padding: 18px 20px;">
+			<p class="helper-text" style="margin-bottom: 10px;">
+				Your admin role gives you access to the protected dashboard and the full member content set.
+			</p>
+			<a class="auth-btn" href="admin.php" style="display: inline-block; text-decoration: none;">Open Admin Dashboard</a>
+		</div>
+	</section>
+<?php endif; ?>
 
 <?php include 'footer.php'; ?>

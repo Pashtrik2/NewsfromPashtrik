@@ -1,7 +1,13 @@
 <?php
+require_once __DIR__ . '/app/bootstrap.php';
+
 if (!isset($pageTitle)) {
     $pageTitle = 'News Portal';
 }
+
+$currentUser = $auth->user();
+$successMessage = $auth->pullFlash('success');
+$errorMessage = $auth->pullFlash('error');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -90,6 +96,41 @@ if (!isset($pageTitle)) {
             border-color: #c9f4ef;
         }
 
+        .site-nav .accent-link {
+            background: var(--brand);
+            color: #ffffff;
+        }
+
+        .site-nav .accent-link:hover {
+            color: #ffffff;
+            background: var(--brand-dark);
+            border-color: var(--brand-dark);
+        }
+
+        .user-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            color: var(--muted);
+            font-size: 0.94rem;
+        }
+
+        .role-badge,
+        .role-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: #dff8f5;
+            color: var(--brand-dark);
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
         main {
             max-width: 1120px;
             margin: 28px auto;
@@ -160,6 +201,141 @@ if (!isset($pageTitle)) {
             font-size: 0.95rem;
         }
 
+        .flash {
+            margin-bottom: 20px;
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 1px solid var(--line);
+            box-shadow: var(--shadow);
+        }
+
+        .flash-success {
+            background: #ecfdf5;
+            color: #166534;
+            border-color: #bbf7d0;
+        }
+
+        .flash-error {
+            background: #fef2f2;
+            color: #991b1b;
+            border-color: #fecaca;
+        }
+
+        .auth-card {
+            max-width: 520px;
+            margin: 24px auto;
+            padding: 24px;
+            background: #ffffff;
+            border: 1px solid #dbe3ec;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .auth-card h2 {
+            margin: 0 0 6px;
+            color: #0f172a;
+        }
+
+        .auth-intro {
+            margin: 0 0 18px;
+            color: #64748b;
+        }
+
+        .auth-form {
+            display: grid;
+            gap: 14px;
+        }
+
+        .field-group {
+            display: grid;
+            gap: 6px;
+        }
+
+        .field-group label {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .field-group input,
+        .field-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font: inherit;
+            background: #ffffff;
+        }
+
+        .field-group input:focus,
+        .field-group select:focus {
+            border-color: #0f766e;
+            outline: 2px solid rgba(15, 118, 110, 0.2);
+            outline-offset: 1px;
+        }
+
+        .field-group input.has-error,
+        .field-group select.has-error {
+            border-color: #dc2626;
+            outline: none;
+        }
+
+        .field-error {
+            min-height: 1.1em;
+            margin: 0;
+            font-size: 0.86rem;
+            color: #b91c1c;
+        }
+
+        .auth-btn {
+            padding: 11px 14px;
+            border: none;
+            border-radius: 10px;
+            background: #0f766e;
+            color: #ffffff;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .auth-btn:hover {
+            background: #115e59;
+        }
+
+        .helper-text {
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .table-card {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow-x: auto;
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .user-table th,
+        .user-table td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .user-table th {
+            color: #0f172a;
+            background: #f8fafc;
+            font-size: 0.9rem;
+        }
+
+        .user-table tr:last-child td {
+            border-bottom: none;
+        }
+
         footer {
             background-color: #e8edf4;
             text-align: center;
@@ -170,6 +346,10 @@ if (!isset($pageTitle)) {
 
         @media (max-width: 640px) {
             .header-wrap {
+                justify-content: center;
+            }
+
+            .user-meta {
                 justify-content: center;
             }
 
@@ -193,10 +373,30 @@ if (!isset($pageTitle)) {
             <li><a href="about.php">About</a></li>
             <li><a href="news.php">News</a></li>
             <li><a href="contact.php">Contact</a></li>
-            <li><a href="login.php">Login</a></li>
-            <li><a href="register.php">Register</a></li>
+            <?php if ($currentUser !== null): ?>
+                <?php if (($currentUser['role'] ?? null) === 'admin'): ?>
+                    <li><a href="admin.php">Admin</a></li>
+                <?php endif; ?>
+                <li><a href="logout.php">Logout</a></li>
+            <?php else: ?>
+                <li><a href="login.php">Login</a></li>
+                <li><a class="accent-link" href="register.php">Register</a></li>
+            <?php endif; ?>
         </ul>
     </nav>
+    <?php if ($currentUser !== null): ?>
+        <div class="user-meta" aria-label="Current user">
+            <span><?php echo htmlspecialchars($currentUser['full_name']); ?></span>
+            <span class="role-badge"><?php echo htmlspecialchars($currentUser['role']); ?></span>
+        </div>
+    <?php endif; ?>
     </div>
 </header>
 <main>
+    <?php if ($successMessage !== null): ?>
+        <div class="flash flash-success"><?php echo htmlspecialchars($successMessage); ?></div>
+    <?php endif; ?>
+
+    <?php if ($errorMessage !== null): ?>
+        <div class="flash flash-error"><?php echo htmlspecialchars($errorMessage); ?></div>
+    <?php endif; ?>

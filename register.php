@@ -1,4 +1,63 @@
 <?php
+declare(strict_types=1);
+
+require_once __DIR__ . '/app/bootstrap.php';
+
+$fullName = '';
+$email = '';
+$errors = [
+	'full_name' => '',
+	'email' => '',
+	'password' => '',
+	'confirm_password' => '',
+];
+
+if ($auth->check()) {
+	$auth->redirectAfterLogin();
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+	$fullName = trim((string) ($_POST['full_name'] ?? ''));
+	$email = strtolower(trim((string) ($_POST['email'] ?? '')));
+	$password = (string) ($_POST['password'] ?? '');
+	$confirmPassword = (string) ($_POST['confirm_password'] ?? '');
+
+	if ($fullName === '') {
+		$errors['full_name'] = 'Full name is required.';
+	}
+
+	if ($email === '') {
+		$errors['email'] = 'Email is required.';
+	} elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+		$errors['email'] = 'Enter a valid email address.';
+	} elseif ($auth->emailExists($email)) {
+		$errors['email'] = 'An account with this email already exists.';
+	}
+
+	if ($password === '') {
+		$errors['password'] = 'Password is required.';
+	} elseif (strlen($password) < 8 || !preg_match('/[A-Za-z]/', $password) || !preg_match('/\d/', $password)) {
+		$errors['password'] = 'Use at least 8 characters with letters and numbers.';
+	}
+
+	if ($confirmPassword === '') {
+		$errors['confirm_password'] = 'Please confirm your password.';
+	} elseif ($password !== $confirmPassword) {
+		$errors['confirm_password'] = 'Passwords do not match.';
+	}
+
+	if (!array_filter($errors)) {
+		$newUser = $auth->register($fullName, $email, $password);
+		$auth->flash(
+			'success',
+			$newUser->isAdmin()
+				? 'Account created. You are the first user, so your role is admin. Please log in.'
+				: 'Account created successfully. Please log in.'
+		);
+		$auth->redirect('login.php');
+	}
+}
+
 $pageTitle = 'Register - News Portal';
 include 'header.php';
 ?>
@@ -7,111 +66,35 @@ include 'header.php';
 	<h2 id="register-title">Create Your Account</h2>
 	<p class="auth-intro">Join the portal to bookmark stories and receive updates from your favorite categories.</p>
 
-	<form id="registerForm" class="auth-form" action="#" method="post" novalidate>
+	<form id="registerForm" class="auth-form" action="register.php" method="post" novalidate>
 		<div class="field-group">
 			<label for="registerName">Full Name</label>
-			<input type="text" id="registerName" name="full_name" autocomplete="name" required>
-			<p class="field-error" id="registerNameError"></p>
+			<input type="text" id="registerName" name="full_name" value="<?php echo htmlspecialchars($fullName); ?>" autocomplete="name" required>
+			<p class="field-error" id="registerNameError"><?php echo htmlspecialchars($errors['full_name']); ?></p>
 		</div>
 
 		<div class="field-group">
 			<label for="registerEmail">Email Address</label>
-			<input type="email" id="registerEmail" name="email" autocomplete="email" required>
-			<p class="field-error" id="registerEmailError"></p>
+			<input type="email" id="registerEmail" name="email" value="<?php echo htmlspecialchars($email); ?>" autocomplete="email" required>
+			<p class="field-error" id="registerEmailError"><?php echo htmlspecialchars($errors['email']); ?></p>
 		</div>
 
 		<div class="field-group">
 			<label for="registerPassword">Password</label>
 			<input type="password" id="registerPassword" name="password" autocomplete="new-password" required>
-			<p class="field-error" id="registerPasswordError"></p>
+			<p class="field-error" id="registerPasswordError"><?php echo htmlspecialchars($errors['password']); ?></p>
 		</div>
 
 		<div class="field-group">
 			<label for="confirmPassword">Confirm Password</label>
 			<input type="password" id="confirmPassword" name="confirm_password" autocomplete="new-password" required>
-			<p class="field-error" id="confirmPasswordError"></p>
+			<p class="field-error" id="confirmPasswordError"><?php echo htmlspecialchars($errors['confirm_password']); ?></p>
 		</div>
 
 		<button type="submit" class="auth-btn">Create Account</button>
 	</form>
+	<p class="helper-text">The first account registered in this app is assigned the admin role. Later accounts are standard users.</p>
 </section>
-
-<style>
-	.auth-card {
-		max-width: 520px;
-		margin: 24px auto;
-		padding: 24px;
-		background: #ffffff;
-		border: 1px solid #dbe3ec;
-		border-radius: 16px;
-		box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
-	}
-
-	.auth-card h2 {
-		margin: 0 0 6px;
-		color: #0f172a;
-	}
-
-	.auth-intro {
-		margin: 0 0 18px;
-		color: #64748b;
-	}
-
-	.auth-form {
-		display: grid;
-		gap: 14px;
-	}
-
-	.field-group {
-		display: grid;
-		gap: 6px;
-	}
-
-	.field-group label {
-		font-weight: 600;
-		color: #1e293b;
-	}
-
-	.field-group input {
-		width: 100%;
-		padding: 10px 12px;
-		border: 1px solid #cbd5e1;
-		border-radius: 10px;
-		font: inherit;
-	}
-
-	.field-group input:focus {
-		border-color: #0f766e;
-		outline: 2px solid rgba(15, 118, 110, 0.2);
-		outline-offset: 1px;
-	}
-
-	.field-group input.has-error {
-		border-color: #dc2626;
-		outline: none;
-	}
-
-	.field-error {
-		min-height: 1.1em;
-		margin: 0;
-		font-size: 0.86rem;
-		color: #b91c1c;
-	}
-
-	.auth-btn {
-		padding: 11px 14px;
-		border: none;
-		border-radius: 10px;
-		background: #0f766e;
-		color: #ffffff;
-		font-weight: 700;
-		cursor: pointer;
-	}
-
-	.auth-btn:hover {
-		background: #115e59;
-	}
-</style>
 
 <script>
 	(function () {
@@ -140,6 +123,11 @@ include 'header.php';
 			errorNode.textContent = message;
 			input.classList.toggle('has-error', message.length > 0);
 		}
+
+		setError(nameInput, nameError, nameError.textContent.trim());
+		setError(emailInput, emailError, emailError.textContent.trim());
+		setError(passwordInput, passwordError, passwordError.textContent.trim());
+		setError(confirmInput, confirmError, confirmError.textContent.trim());
 
 		form.addEventListener('submit', function (event) {
 			var nameValue = nameInput.value.trim();
