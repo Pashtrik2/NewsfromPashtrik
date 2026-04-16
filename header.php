@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/app/bootstrap.php';
+require_once __DIR__ . '/app/database.php';
 
 if (!isset($pageTitle)) {
     $pageTitle = 'News Portal';
@@ -17,15 +18,27 @@ $errorMessage = $auth->pullFlash('error');
     <title><?php echo htmlspecialchars($pageTitle); ?></title>
     <style>
         :root {
-            --bg: #f3f6fb;
+            --bg: #eef4f8;
             --surface: #ffffff;
-            --ink: #1f2937;
-            --muted: #64748b;
+            --surface-soft: rgba(255, 255, 255, 0.7);
+            --ink: #172033;
+            --muted: #5f6f86;
             --brand: #0f766e;
-            --brand-dark: #115e59;
-            --line: #dbe3ec;
-            --shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
-            --radius: 16px;
+            --brand-dark: #0b5b55;
+            --brand-soft: #d9f3ef;
+            --accent: #d97706;
+            --line: #d7e2ec;
+            --line-strong: #c4d1dd;
+            --shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+            --shadow-soft: 0 10px 28px rgba(15, 23, 42, 0.05);
+            --radius: 24px;
+            --radius-sm: 16px;
+            --space-1: 8px;
+            --space-2: 16px;
+            --space-3: 24px;
+            --space-4: 32px;
+            --space-5: 48px;
+            --container: 1200px;
         }
 
         * {
@@ -34,39 +47,51 @@ $errorMessage = $auth->pullFlash('error');
 
         body {
             margin: 0;
+            min-height: 100vh;
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
             background:
-                radial-gradient(circle at 10% 5%, #dff8f5 0%, transparent 40%),
-                radial-gradient(circle at 90% 0%, #eaf2ff 0%, transparent 35%),
+                radial-gradient(circle at top left, rgba(180, 241, 232, 0.9) 0%, transparent 32%),
+                radial-gradient(circle at top right, rgba(216, 230, 255, 0.95) 0%, transparent 30%),
                 var(--bg);
             color: var(--ink);
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .container {
+            width: min(100% - 32px, var(--container));
+            margin: 0 auto;
         }
 
         .site-header {
             position: sticky;
             top: 0;
             z-index: 20;
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(18px);
             border-bottom: 1px solid var(--line);
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
         }
 
         .header-wrap {
-            max-width: 1120px;
+            width: min(100% - 32px, var(--container));
             margin: 0 auto;
-            padding: 16px;
+            padding: 14px 0;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
+            gap: var(--space-2);
             flex-wrap: wrap;
         }
 
         .brand {
             margin: 0;
-            font-size: 1.35rem;
-            letter-spacing: 0.3px;
+            font-size: 1.55rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
             color: var(--brand-dark);
         }
 
@@ -76,35 +101,41 @@ $errorMessage = $auth->pullFlash('error');
             padding: 0;
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 10px;
         }
 
         .site-nav a {
-            display: inline-block;
-            padding: 8px 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 42px;
+            padding: 10px 14px;
             border-radius: 999px;
             color: var(--ink);
             text-decoration: none;
-            font-weight: 600;
+            font-size: 0.96rem;
+            font-weight: 700;
             border: 1px solid transparent;
-            transition: all 0.2s ease;
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
         }
 
         .site-nav a:hover {
             color: var(--brand-dark);
-            background-color: #e6fffb;
-            border-color: #c9f4ef;
+            background: rgba(15, 118, 110, 0.08);
+            border-color: rgba(15, 118, 110, 0.14);
+            transform: translateY(-1px);
         }
 
         .site-nav .accent-link {
-            background: var(--brand);
             color: #ffffff;
+            background: linear-gradient(135deg, var(--brand) 0%, #1f8a82 100%);
+            box-shadow: 0 12px 24px rgba(15, 118, 110, 0.22);
         }
 
         .site-nav .accent-link:hover {
             color: #ffffff;
-            background: var(--brand-dark);
-            border-color: var(--brand-dark);
+            background: linear-gradient(135deg, var(--brand-dark) 0%, #126f69 100%);
+            border-color: transparent;
         }
 
         .user-meta {
@@ -117,96 +148,39 @@ $errorMessage = $auth->pullFlash('error');
         }
 
         .role-badge,
-        .role-pill {
+        .role-pill,
+        .hero-badge {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 4px 10px;
+            padding: 6px 12px;
             border-radius: 999px;
-            background: #dff8f5;
+            background: var(--brand-soft);
             color: var(--brand-dark);
-            font-size: 0.82rem;
-            font-weight: 700;
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
         }
 
-        main {
-            max-width: 1120px;
-            margin: 28px auto;
-            padding: 0 16px;
-            min-height: 60vh;
+        .page-shell {
+            width: min(100% - 32px, var(--container));
+            margin: 0 auto;
+            padding: 20px 0 56px;
+            min-height: calc(100vh - 96px);
         }
 
-        .hero {
-            background: linear-gradient(135deg, #0f766e 0%, #155e75 100%);
-            color: #f8fafc;
-            border-radius: 20px;
-            padding: 48px 30px;
-            box-shadow: var(--shadow);
-            margin-bottom: 28px;
-        }
-
-        .hero h2 {
-            margin: 0 0 10px;
-            font-size: clamp(1.7rem, 4vw, 2.6rem);
-            line-height: 1.2;
-        }
-
-        .hero p {
-            margin: 0;
-            max-width: 680px;
-            color: #d7f8f3;
-        }
-
-        .section-title {
-            margin: 0 0 14px;
-            font-size: 1.4rem;
-            color: #0f172a;
-        }
-
-        .news-grid {
+        .page-stack {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 18px;
-        }
-
-        .news-card {
-            background: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
-            overflow: hidden;
-            box-shadow: var(--shadow);
-        }
-
-        .news-card img {
-            width: 100%;
-            height: 170px;
-            object-fit: cover;
-            display: block;
-        }
-
-        .news-content {
-            padding: 14px;
-        }
-
-        .news-content h3 {
-            margin: 0 0 6px;
-            font-size: 1.05rem;
-        }
-
-        .news-content p {
-            margin: 0;
-            color: var(--muted);
-            font-size: 0.95rem;
+            gap: var(--space-4);
         }
 
         .flash {
-            margin-bottom: 20px;
+            margin: 0;
             padding: 14px 16px;
-            border-radius: 14px;
+            border-radius: var(--radius-sm);
             border: 1px solid var(--line);
-            box-shadow: var(--shadow);
+            box-shadow: var(--shadow-soft);
         }
 
         .flash-success {
@@ -221,62 +195,283 @@ $errorMessage = $auth->pullFlash('error');
             border-color: #fecaca;
         }
 
-        .auth-card {
-            max-width: 520px;
-            margin: 24px auto;
-            padding: 24px;
-            background: #ffffff;
-            border: 1px solid #dbe3ec;
-            border-radius: 16px;
+        .hero {
+            position: relative;
+            overflow: hidden;
+            display: grid;
+            gap: var(--space-3);
+            padding: clamp(24px, 4vw, 44px);
+            border-radius: 30px;
+            background:
+                radial-gradient(circle at top right, rgba(255, 255, 255, 0.24) 0%, transparent 30%),
+                linear-gradient(135deg, #0f766e 0%, #155e75 52%, #1d4f91 100%);
+            color: #f8fafc;
             box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.14);
         }
 
-        .auth-card h2 {
-            margin: 0 0 6px;
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: auto -8% -30% auto;
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.12);
+            filter: blur(2px);
+        }
+
+        .hero > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-home {
+            grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.75fr);
+            align-items: end;
+        }
+
+        .hero-copy {
+            display: grid;
+            gap: var(--space-2);
+        }
+
+        .hero-title {
+            margin: 0;
+            max-width: 12ch;
+            font-size: clamp(2.2rem, 5vw, 4.3rem);
+            line-height: 0.97;
+            letter-spacing: -0.05em;
+        }
+
+        .hero-text {
+            margin: 0;
+            max-width: 58ch;
+            color: rgba(248, 250, 252, 0.84);
+            font-size: 1.02rem;
+        }
+
+        .hero-metrics {
+            display: grid;
+            gap: var(--space-2);
+        }
+
+        .stat-card,
+        .mini-card,
+        .auth-card,
+        .table-card,
+        .feature-card,
+        .prose-card {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .stat-card {
+            padding: 18px 20px;
+            background: rgba(255, 255, 255, 0.14);
+            border-color: rgba(255, 255, 255, 0.18);
+            color: #ffffff;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-card strong {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 1.45rem;
+            line-height: 1;
+        }
+
+        .stat-card span {
+            color: rgba(248, 250, 252, 0.78);
+            font-size: 0.92rem;
+        }
+
+        .section-shell {
+            display: grid;
+            gap: var(--space-3);
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: var(--space-2);
+            flex-wrap: wrap;
+        }
+
+        .section-kicker {
+            margin: 0;
+            color: var(--brand-dark);
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .section-title {
+            margin: 4px 0 0;
+            font-size: clamp(1.7rem, 3vw, 2.4rem);
+            line-height: 1.1;
+            letter-spacing: -0.04em;
             color: #0f172a;
         }
 
-        .auth-intro {
-            margin: 0 0 18px;
-            color: #64748b;
+        .section-description {
+            margin: 0;
+            max-width: 50ch;
+            color: var(--muted);
         }
 
-        .auth-form {
+        .feature-grid,
+        .news-grid,
+        .admin-grid {
             display: grid;
-            gap: 14px;
+            gap: var(--space-3);
+        }
+
+        .feature-grid,
+        .news-grid {
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        }
+
+        .feature-card,
+        .prose-card,
+        .auth-card,
+        .table-card {
+            padding: 24px;
+        }
+
+        .feature-card h3,
+        .prose-card h3,
+        .auth-card h2 {
+            margin: 0;
+            color: #0f172a;
+        }
+
+        .feature-card p,
+        .prose-card p,
+        .auth-intro,
+        .helper-text {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        .news-card {
+            overflow: hidden;
+            transition: transform 0.22s ease, box-shadow 0.22s ease;
+        }
+
+        .news-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 34px rgba(15, 23, 42, 0.1);
+        }
+
+        .news-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .news-content {
+            display: grid;
+            gap: 10px;
+            padding: 20px;
+        }
+
+        .news-content h3 {
+            margin: 0;
+            font-size: 1.14rem;
+            line-height: 1.25;
+        }
+
+        .news-content p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.96rem;
+        }
+
+        .auth-card {
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        .auth-card,
+        .prose-card,
+        .feature-card,
+        .table-card {
+            display: grid;
+            gap: var(--space-2);
+        }
+
+        .auth-form,
+        .stack-form,
+        .toolbar-form {
+            display: grid;
+            gap: var(--space-2);
+        }
+
+        .toolbar-form {
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            align-items: end;
         }
 
         .field-group {
             display: grid;
-            gap: 6px;
+            gap: 8px;
         }
 
         .field-group label {
-            font-weight: 600;
+            font-weight: 700;
             color: #1e293b;
         }
 
         .field-group input,
-        .field-group select {
+        .field-group select,
+        .field-group textarea,
+        .toolbar-form input,
+        .toolbar-form select,
+        .toolbar-form textarea,
+        .table-card input,
+        .table-card textarea,
+        .table-card select {
             width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 10px;
+            padding: 12px 14px;
+            border: 1px solid var(--line-strong);
+            border-radius: 14px;
             font: inherit;
+            color: var(--ink);
             background: #ffffff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .field-group textarea,
+        .table-card textarea {
+            min-height: 120px;
+            resize: vertical;
         }
 
         .field-group input:focus,
-        .field-group select:focus {
-            border-color: #0f766e;
-            outline: 2px solid rgba(15, 118, 110, 0.2);
-            outline-offset: 1px;
+        .field-group select:focus,
+        .field-group textarea:focus,
+        .toolbar-form input:focus,
+        .toolbar-form select:focus,
+        .toolbar-form textarea:focus,
+        .table-card input:focus,
+        .table-card textarea:focus,
+        .table-card select:focus {
+            border-color: var(--brand);
+            box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+            outline: none;
         }
 
         .field-group input.has-error,
-        .field-group select.has-error {
+        .field-group select.has-error,
+        .field-group textarea.has-error {
             border-color: #dc2626;
-            outline: none;
+            box-shadow: none;
         }
 
         .field-error {
@@ -286,67 +481,123 @@ $errorMessage = $auth->pullFlash('error');
             color: #b91c1c;
         }
 
-        .auth-btn {
-            padding: 11px 14px;
+        .auth-btn,
+        .link-btn,
+        .table-card button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 46px;
+            padding: 12px 16px;
             border: none;
-            border-radius: 10px;
-            background: #0f766e;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--brand) 0%, #1c8d84 100%);
             color: #ffffff;
-            font-weight: 700;
+            font-weight: 800;
+            text-decoration: none;
             cursor: pointer;
+            box-shadow: 0 12px 24px rgba(15, 118, 110, 0.16);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
         }
 
-        .auth-btn:hover {
-            background: #115e59;
+        .auth-btn:hover,
+        .link-btn:hover,
+        .table-card button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 28px rgba(15, 118, 110, 0.2);
         }
 
-        .helper-text {
-            margin: 0;
-            color: var(--muted);
-            font-size: 0.92rem;
-        }
-
-        .table-card {
-            background: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            overflow-x: auto;
+        .toolbar-form button,
+        .toolbar-form .auth-btn,
+        .toolbar-form .link-btn {
+            width: 100%;
         }
 
         .user-table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 680px;
         }
 
         .user-table th,
         .user-table td {
-            padding: 14px 16px;
+            padding: 16px;
             text-align: left;
             border-bottom: 1px solid var(--line);
+            vertical-align: top;
         }
 
         .user-table th {
             color: #0f172a;
-            background: #f8fafc;
+            background: #f8fbfd;
             font-size: 0.9rem;
+            font-weight: 800;
         }
 
         .user-table tr:last-child td {
             border-bottom: none;
         }
 
-        footer {
-            background-color: #e8edf4;
-            text-align: center;
-            padding: 18px 16px;
-            color: #334155;
+        .table-actions {
+            display: grid;
+            gap: 10px;
+        }
+
+        .admin-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            align-items: start;
+        }
+
+        .admin-grid > * {
+            min-width: 0;
+        }
+
+        .admin-grid-full {
+            grid-column: 1 / -1;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            margin: 0 -24px -24px;
+            padding: 0 24px 24px;
+        }
+
+        .table-scroll .user-table {
+            min-width: 680px;
+        }
+
+        .panel-note {
+            padding: 18px 20px;
+        }
+
+        .site-footer {
             border-top: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+        }
+
+        .footer-wrap {
+            width: min(100% - 32px, var(--container));
+            margin: 0 auto;
+            padding: 18px 0 28px;
+            text-align: center;
+            color: #334155;
+            font-size: 0.95rem;
+        }
+
+        .footer-wrap p {
+            margin: 0;
+        }
+
+        .footer-wrap p + p {
+            margin-top: 6px;
         }
 
         @media (max-width: 640px) {
             .header-wrap {
                 justify-content: center;
+                padding: 12px 0;
             }
 
             .user-meta {
@@ -357,8 +608,49 @@ $errorMessage = $auth->pullFlash('error');
                 justify-content: center;
             }
 
+            .container,
+            .page-shell,
+            .header-wrap,
+            .footer-wrap {
+                width: min(100% - 20px, var(--container));
+            }
+
             .hero {
-                padding: 34px 20px;
+                padding: 22px;
+                border-radius: 24px;
+            }
+
+            .section-heading {
+                align-items: start;
+            }
+
+            .user-table {
+                min-width: 560px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .hero-home,
+            .admin-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 1100px) {
+            .toolbar-form {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .toolbar-form button,
+            .toolbar-form .auth-btn,
+            .toolbar-form .link-btn {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .toolbar-form {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -366,37 +658,38 @@ $errorMessage = $auth->pullFlash('error');
 <body>
 <header class="site-header">
     <div class="header-wrap">
-    <h1 class="brand">News Portal</h1>
-    <nav class="site-nav" aria-label="Main navigation">
-        <ul>
-            <li><a href="index.php">Home</a></li>
-            <li><a href="about.php">About</a></li>
-            <li><a href="news.php">News</a></li>
-            <li><a href="contact.php">Contact</a></li>
-            <?php if ($currentUser !== null): ?>
-                <?php if (($currentUser['role'] ?? null) === 'admin'): ?>
-                    <li><a href="admin.php">Admin</a></li>
+        <h1 class="brand">News Portal</h1>
+        <nav class="site-nav" aria-label="Main navigation">
+            <ul>
+                <li><a href="index.php">Home</a></li>
+                <li><a href="about.php">About</a></li>
+                <li><a href="news.php">News</a></li>
+                <li><a href="contact.php">Contact</a></li>
+                <?php if ($currentUser !== null): ?>
+                    <?php if (($currentUser['role'] ?? null) === 'admin'): ?>
+                        <li><a href="admin.php">Admin</a></li>
+                    <?php endif; ?>
+                    <li><a href="logout.php">Logout</a></li>
+                <?php else: ?>
+                    <li><a href="login.php">Login</a></li>
+                    <li><a class="accent-link" href="register.php">Register</a></li>
                 <?php endif; ?>
-                <li><a href="logout.php">Logout</a></li>
-            <?php else: ?>
-                <li><a href="login.php">Login</a></li>
-                <li><a class="accent-link" href="register.php">Register</a></li>
-            <?php endif; ?>
-        </ul>
-    </nav>
-    <?php if ($currentUser !== null): ?>
-        <div class="user-meta" aria-label="Current user">
-            <span><?php echo htmlspecialchars($currentUser['full_name']); ?></span>
-            <span class="role-badge"><?php echo htmlspecialchars($currentUser['role']); ?></span>
-        </div>
-    <?php endif; ?>
+            </ul>
+        </nav>
+        <?php if ($currentUser !== null): ?>
+            <div class="user-meta" aria-label="Current user">
+                <span><?php echo htmlspecialchars($currentUser['full_name']); ?></span>
+                <span class="role-badge"><?php echo htmlspecialchars($currentUser['role']); ?></span>
+            </div>
+        <?php endif; ?>
     </div>
 </header>
-<main>
-    <?php if ($successMessage !== null): ?>
-        <div class="flash flash-success"><?php echo htmlspecialchars($successMessage); ?></div>
-    <?php endif; ?>
+<main class="page-shell">
+    <div class="page-stack">
+        <?php if ($successMessage !== null): ?>
+            <div class="flash flash-success"><?php echo htmlspecialchars($successMessage); ?></div>
+        <?php endif; ?>
 
-    <?php if ($errorMessage !== null): ?>
-        <div class="flash flash-error"><?php echo htmlspecialchars($errorMessage); ?></div>
-    <?php endif; ?>
+        <?php if ($errorMessage !== null): ?>
+            <div class="flash flash-error"><?php echo htmlspecialchars($errorMessage); ?></div>
+        <?php endif; ?>
