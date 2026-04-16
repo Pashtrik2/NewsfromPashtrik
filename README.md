@@ -1,25 +1,110 @@
-# NewsfromPashtrik
+# 📰 News Portal
 
-This project now includes PHP OOP authentication with:
+Ky projekt është një web aplikacion i zhvilluar për menaxhimin dhe publikimin e lajmeve.
+Aplikacioni është ndërtuar si pjesë e projektit universitar dhe përfshin funksionalitete të plota front-end dhe back-end.
 
-- User registration and login
-- Password hashing with `password_hash()` and `password_verify()`
-- Session-based authentication
-- Role-based access for `admin` and `user`
-- A protected admin dashboard
+---
 
-## Role assignment
+## 🚀 Funksionalitetet
 
-The first account registered is assigned the `admin` role. Every account created after that is assigned the `user` role.
+* 🔐 Regjistrimi dhe kyçja e përdoruesve (Login/Register)
+* 👤 Role të përdoruesve (Admin dhe User)
+* 📰 Menaxhimi i lajmeve (Create, Read, Update, Delete)
+* 📷 Upload i imazheve për lajme
+* 📩 Contact form (ruhet në databazë)
+* 🧑‍💻 Admin Dashboard për menaxhim
+* 🌐 Përmbajtje dinamike nga databaza
 
-## Storage
+---
 
-Registered users are stored in `storage/users.json` when that directory is writable. If the web server cannot write there, the app falls back to a writable directory inside the system temporary folder.
+## 🛠 Teknologjitë e përdorura
 
-## Pages
+* HTML5
+* CSS3
+* JavaScript
+* PHP (OOP)
+* MySQL
+* Git & GitHub
 
-- `register.php`: creates a new account
-- `login.php`: authenticates an existing account
-- `logout.php`: clears the session
-- `news.php`: protected page for authenticated users
-- `admin.php`: protected page for admin users only
+---
+
+## ⚙️ Si ta ekzekutosh projektin
+
+1. Instalo XAMPP ose MAMP
+2. Vendos projektin në folderin `htdocs`
+3. Start Apache dhe MySQL
+4. Importo databazën në phpMyAdmin
+5. Hap në browser:
+
+```bash
+http://localhost/news-portal/
+```
+
+---
+
+## 🗄 Databaza
+
+Sigurohu që ke krijuar databazën me tabelat:
+
+* users
+* news
+* messages
+
+---
+
+## 🔐 Kredencialet për testim
+
+**Admin:**
+
+* Email: [kpashtrik@gmail.com](mailto:admin@test.com)
+* Password: Lubova123
+
+**User:**
+
+* Email: [user2@test.com](mailto:user@test.com)
+* Password: Lubova123
+
+---
+
+## 📁 Struktura e projektit
+
+```
+project/
+│
+├── index.php
+├── about.php
+├── news.php
+├── contact.php
+├── login.php
+├── register.php
+│
+├── admin.php
+│
+├── config/
+├── classes/
+├── assets/
+│
+└── uploads/
+```
+
+---
+
+## 📌 Shënim
+
+Ky projekt është zhvilluar për qëllime akademike dhe demonstron njohuritë në zhvillimin e aplikacioneve web (full-stack).
+
+---
+
+## 👤 Autori
+
+Pashtrik Kajtazaj
+
+## 👤 Profesori 
+
+Erzen Talla
+
+## 📁 Lenda
+
+Dizajni dhe zhvillimi i web-it.
+
+17.04.2026
