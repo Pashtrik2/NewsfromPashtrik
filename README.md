@@ -1,11 +1,10 @@
-# 📰 News Portal
+📰 News Portal
 
 Ky projekt është një web aplikacion i zhvilluar për menaxhimin dhe publikimin e lajmeve.
 Aplikacioni është ndërtuar si pjesë e projektit universitar dhe përfshin funksionalitete të plota front-end dhe back-end.
 
----
 
-## 🚀 Funksionalitetet
+🚀 Funksionalitetet
 
 * 🔐 Regjistrimi dhe kyçja e përdoruesve (Login/Register)
 * 👤 Role të përdoruesve (Admin dhe User)
@@ -15,9 +14,8 @@ Aplikacioni është ndërtuar si pjesë e projektit universitar dhe përfshin fu
 * 🧑‍💻 Admin Dashboard për menaxhim
 * 🌐 Përmbajtje dinamike nga databaza
 
----
 
-## 🛠 Teknologjitë e përdorura
+🛠 Teknologjitë e përdorura
 
 * HTML5
 * CSS3
@@ -26,47 +24,21 @@ Aplikacioni është ndërtuar si pjesë e projektit universitar dhe përfshin fu
 * MySQL
 * Git & GitHub
 
----
 
-## ⚙️ Si ta ekzekutosh projektin
+🔐 Kredencialet për testim
 
-1. Instalo XAMPP ose MAMP
-2. Vendos projektin në folderin `htdocs`
-3. Start Apache dhe MySQL
-4. Importo databazën në phpMyAdmin
-5. Hap në browser:
-
-```bash
-http://localhost/news-portal/
-```
-
----
-
-## 🗄 Databaza
-
-Sigurohu që ke krijuar databazën me tabelat:
-
-* users
-* news
-* messages
-
----
-
-## 🔐 Kredencialet për testim
-
-**Admin:**
-
+Admin:
 * Email: [kpashtrik@gmail.com](mailto:admin@test.com)
 * Password: Lubova123
 
-**User:**
+User:
 
 * Email: [user2@test.com](mailto:user@test.com)
 * Password: Lubova123
 
----
 
-## 📁 Struktura e projektit
+
+📁 Struktura e projektit
 
 ```
 project/
@@ -87,23 +59,20 @@ project/
 └── uploads/
 ```
 
----
-
-## 📌 Shënim
+📌 Shënim
 
 Ky projekt është zhvilluar për qëllime akademike dhe demonstron njohuritë në zhvillimin e aplikacioneve web (full-stack).
 
----
 
-## 👤 Autori
+👤 Autori
 
 Pashtrik Kajtazaj
 
-## 👤 Profesori 
+👤 Profesori 
 
 Erzen Talla
 
-## 📁 Lenda
+📁 Lenda
 
 Dizajni dhe zhvillimi i web-it.
 
